@@ -9,6 +9,8 @@ class Searcher(Agent):
         # Behaviour
         self.vision_radius = vision_radius
         self.has_found = False
+        self.at_casualty = False
+        self.arrival_time = None
         self.steps_taken = 0
 
         # Local memory
@@ -20,12 +22,11 @@ class Searcher(Agent):
         self.shared_visit_count = None
 
         # Modes
-        self.mode = "search"     # "search" or "rescue"
-        self.target = None       # (x, y)
+        self.mode = "search"     
+        self.target = None       
 
-    # ----------------------------------------------------
     # Neighbour cells
-    # ----------------------------------------------------
+
     def neighbours(self, env):
         candidates = [
             (self.x + 1, self.y),
@@ -35,16 +36,14 @@ class Searcher(Agent):
         ]
         return [(x, y) for (x, y) in candidates if env.is_free(x, y)]
 
-    # ----------------------------------------------------
     # Main Step Function
-    # ----------------------------------------------------
+
     def step(self, env):
-        if self.has_found:
+        if self.at_casualty:
             return
 
-        # ====================================================
+     
         # RESCUE MODE: move toward the known casualty location
-        # ====================================================
         if self.mode == "rescue" and self.target:
             tx, ty = self.target
 
@@ -68,9 +67,9 @@ class Searcher(Agent):
                 self._apply_move(new_x, new_y)
             return
 
-        # ====================================================
+       
         # SEARCH MODE: cooperative frontier-based exploration
-        # ====================================================
+
         options = self.neighbours(env)
         if not options:
             return
@@ -99,9 +98,9 @@ class Searcher(Agent):
         new_x, new_y = chosen
         self._apply_move(new_x, new_y)
 
-    # ----------------------------------------------------
+   
     # MOVE APPLY HELPER
-    # ----------------------------------------------------
+
     def _apply_move(self, new_x, new_y):
         self.last_pos = (self.x, self.y)
         self.x, self.y = new_x, new_y
@@ -115,18 +114,14 @@ class Searcher(Agent):
         # Shared memory
         self.shared_visit_count[self.pos] = self.shared_visit_count.get(self.pos, 0) + 1
 
-    # ----------------------------------------------------
+   
     # Detect casualty
-    # ----------------------------------------------------
-    def detect_casualty(self, casualty):
-        if self.x == casualty.x and self.y == casualty.y:
-            self.has_found = True
-            return True
 
-        if self.vision_radius > 0:
-            dist = abs(self.x - casualty.x) + abs(self.y - casualty.y)
-            if dist <= self.vision_radius:
+    def detect_casualty(self, casualty, t):
+        if (self.x, self.y) == (casualty.x, casualty.y):
+            if not self.at_casualty:
+                self.at_casualty = True
+                self.arrival_time = t
                 self.has_found = True
-                return True
-
+            return True
         return False

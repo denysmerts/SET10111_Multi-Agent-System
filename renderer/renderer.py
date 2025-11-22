@@ -5,9 +5,8 @@ from agents.searcher import Searcher
 from agents.casualty import Casualty
 from agents.drone import Drone
 
-# ------------------------------------------------
 # LOAD AGENT IMAGES
-# ------------------------------------------------
+
 ASSETS_PATH = "assets"
 
 DRONE_IMAGE = pygame.image.load(os.path.join(ASSETS_PATH, "drone.png"))
@@ -19,9 +18,8 @@ SEARCHER_IMAGE = pygame.transform.smoothscale(SEARCHER_IMAGE, (CELL_SIZE, CELL_S
 CASUALTY_IMAGE = pygame.image.load(os.path.join(ASSETS_PATH, "casualty.png"))
 CASUALTY_IMAGE = pygame.transform.smoothscale(CASUALTY_IMAGE, (CELL_SIZE, CELL_SIZE))
 
-# ------------------------------------------------
-# COLORS (used for UI + fallback)
-# ------------------------------------------------
+
+# COLORS 
 COLOR_BG = (10, 10, 20)
 COLOR_GRID = (30, 30, 40)
 COLOR_SEARCHER = (56, 189, 248)
@@ -43,9 +41,9 @@ class Renderer:
         self.font_med = pygame.font.SysFont("consolas", 20, bold=True)
         self.font_big = pygame.font.SysFont("consolas", 24, bold=True)
 
-    # ------------------------------------------------
+  
     # GRID + OBSTACLES
-    # ------------------------------------------------
+  
     def draw_grid(self):
         for x in range(GRID_WIDTH):
             for y in range(GRID_HEIGHT):
@@ -67,9 +65,9 @@ class Renderer:
             )
             pygame.draw.rect(self.screen, COLOR_OBSTACLE, rect)
 
-    # ------------------------------------------------
+   
     # DRAW AGENTS (IMAGES)
-    # ------------------------------------------------
+
     def draw_agents(self):
         # Casualty image
         cx, cy = self.sim.casualty.pos
@@ -84,9 +82,9 @@ class Renderer:
         dx, dy = self.sim.drone.pos
         self.screen.blit(DRONE_IMAGE, (dx * CELL_SIZE, dy * CELL_SIZE))
 
-    # ------------------------------------------------
+   
     # SIDE PANEL
-    # ------------------------------------------------
+  
     def draw_panel(self):
         panel_rect = pygame.Rect(
             GRID_WIDTH * CELL_SIZE,
@@ -105,9 +103,6 @@ class Renderer:
         self.screen.blit(title, (x0, y))
         y += 32
 
-        subtitle = self.font_small.render("Multi-Agent Simulation", True, COLOR_HIGHLIGHT)
-        self.screen.blit(subtitle, (x0, y))
-        y += 32
 
         # Status
         status = "RUNNING" if self.sim.running else "PAUSED"
@@ -116,9 +111,7 @@ class Renderer:
         self.screen.blit(status_text, (x0, y))
         y += 28
 
-        # Steps + time
-        self.screen.blit(self.font_small.render(f"Steps: {self.sim.step_count}", True, COLOR_TEXT), (x0, y))
-        y += 22
+        
 
         self.screen.blit(self.font_small.render(f"Time: {self.sim.elapsed_time:.1f}s", True, COLOR_TEXT), (x0, y))
         y += 22
@@ -132,6 +125,34 @@ class Renderer:
             self.screen.blit(self.font_small.render(
                 f"in {self.sim.time_to_find:.1f}s", True, COLOR_HIGHLIGHT), (x0, y))
             y += 26
+
+            # Arrival times per searcher
+            arrivals = [s for s in self.sim.searchers if s.arrival_time is not None]
+            if arrivals:
+                arrivals.sort(key=lambda a: a.arrival_time)
+                self.screen.blit(self.font_small.render(
+                    "Arrival times:", True, COLOR_HIGHLIGHT), (x0, y))
+                y += 22
+
+                for i, s in enumerate(arrivals, start=1):
+                    if i == 1:
+                        suffix = "st"
+                    elif i == 2:
+                        suffix = "nd"
+                    elif i == 3:
+                        suffix = "rd"
+                    else:
+                        suffix = "th"
+
+                    line = f"{i}{suffix}: S{s.id} at {s.arrival_time:.1f}s"
+                    self.screen.blit(self.font_small.render(line, True, COLOR_TEXT), (x0, y))
+                    y += 20
+
+                if self.sim.all_rescued_time is not None:
+                    msg = f"All rescuers reached casualty at {self.sim.all_rescued_time:.1f}s"
+                    self.screen.blit(self.font_small.render(msg, True, COLOR_HIGHLIGHT), (x0, y))
+                    y += 24
+
         else:
             self.screen.blit(self.font_small.render("Casualty not yet found", True, COLOR_TEXT), (x0, y))
             y += 26
