@@ -14,13 +14,11 @@ class Simulation:
         self.env = Environment(GRID_WIDTH, GRID_HEIGHT)
 
         # CASUALTY
-
         c = self.env.random_free_cell()
         self.casualty = Casualty(c.x, c.y)
 
   
         # SEARCHERS
-
         self.searchers = []
         for i in range(NUM_SEARCHERS):
             while True:
@@ -31,7 +29,6 @@ class Simulation:
 
     
         # SHARED KNOWLEDGE MAP (COOPERATIVE SEARCH)
-   
         self.shared_visit_count = {}  
 
         # Attach to each searcher
@@ -40,7 +37,6 @@ class Simulation:
 
       
         # DRONE 
-   
         while True:
             d = self.env.random_free_cell()
             dist = abs(d.x - self.casualty.x) + abs(d.y - self.casualty.y)
@@ -51,20 +47,18 @@ class Simulation:
 
      
         # SIMULATION STATE
-      
         self.running = False
         self.start_time = None
         self.step_count = 0
 
-        # first detection
+        # FIRST DETECTION
         self.time_to_find = None
         self.found_by = None
 
-        # team rescue tracking
+        # TEAM RESCUE TRACKING
         self.all_rescued_time = None
 
     # PUBLIC CONTROL METHODS
-  
     def reset(self):
         self.__init__()
 
@@ -76,7 +70,7 @@ class Simulation:
         self.found_by = None
         self.all_rescued_time = None
 
-        # Reset agents
+        # RESET AGENTS
         self.shared_visit_count.clear()
 
         for s in self.searchers:
@@ -102,8 +96,7 @@ class Simulation:
         else:
             self.running = False
 
-    # UPDATE — main simulation tick
-  
+    # UPDATE 
     def update(self):
         if not self.running:
             return
@@ -115,7 +108,6 @@ class Simulation:
 
    
         # SEARCHERS UPDATE
-     
         for s in self.searchers:
             # searcher that already reached casualty stays there
             if not s.at_casualty:
@@ -132,7 +124,6 @@ class Simulation:
 
        
         # WHEN ANY SEARCHER FINDS - CALL THE OTHERS
-      
         if someone_found:
             for s in self.searchers:
                 s.mode = "rescue"
@@ -140,7 +131,6 @@ class Simulation:
 
        
         # DRONE UPDATE
-       
         self.drone.step(self.env)
 
         # DRONE DETECTION ALSO TRIGGERS RESCUE
@@ -155,7 +145,6 @@ class Simulation:
 
         
         # TEAM COMPLETION: all searchers at casualty
-   
         if self.all_rescued_time is None:
             if all(s.at_casualty for s in self.searchers):
                 self.all_rescued_time = t

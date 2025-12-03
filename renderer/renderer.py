@@ -66,7 +66,7 @@ class Renderer:
             pygame.draw.rect(self.screen, COLOR_OBSTACLE, rect)
 
    
-    # DRAW AGENTS (IMAGES)
+    # DRAW AGENTS 
 
     def draw_agents(self):
         # Casualty image
@@ -203,9 +203,8 @@ class Renderer:
             self.screen.blit(self.font_small.render(line, True, COLOR_TEXT), (x0, y))
             y += 20
 
-    # ------------------------------------------------
+    
     # MASTER DRAW FUNCTION
-    # ------------------------------------------------
     def draw(self):
         self.screen.fill(COLOR_BG)
         self.draw_grid()

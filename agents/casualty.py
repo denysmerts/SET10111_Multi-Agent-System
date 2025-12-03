@@ -5,4 +5,4 @@ class Casualty(Agent):
         super().__init__(id_=0, x=x, y=y)
 
     def step(self, env):
-        pass  # Static for now
+        pass  
